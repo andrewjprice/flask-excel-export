@@ -1,19 +1,30 @@
-<!doctype html>
+{% extends 'base.html' %}
 
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Flask - Celery Example</title>
-  <meta name="description" content="Flask - Celery Example">
-  <meta name="author" content="Andrew">
-</head>
+{% block javascript %}
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#small').on('click', function() {
+                $.ajax({
+                    url: '/generate_small',
+                    type: 'GET',
+                    success: function(data) {
+                        alert('generating excel file...');
+                    },
+                    fail: function(error) {
+                        console.log('error');
+                    }
+                })
+            });
+        });
+    </script>
+{% endblock %}
 
-<body>
+{% block content %}
     <div>
         <h1>Excel Report Generator</h1>
         <hr />
         <div>
-            <button>Generate Small Excel</button>
+            <button id='small'>Generate Small Excel</button>
             <button>Generate Medium Excel</button>
             <button>Generate Large Excel</button>
         </div>
@@ -22,6 +33,8 @@
     <div>
         <h1>Files</h1>
         <hr />
+        {% for url in urls %}
+        <a href='{{url}}'>Download</a>
+        {% endfor %}
     </div>
-</body>
-</html>
+{% endblock %}
