@@ -1,20 +1,52 @@
 {% extends 'base.html' %}
 
 {% block javascript %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             $('#small').on('click', function() {
+                div = $('<div class="progress"><div>Small File</div><div>0%</div><div id="download"></div></div><hr style="width: 50%" />');
+                $('#progress').append(div);
+
+                // create a progress bar
+                var nanobar = new Nanobar({
+                    bg: '#44f',
+                    target: div[0].childNodes[0]
+                });
+
                 $.ajax({
                     url: '/generate_small',
                     type: 'GET',
-                    success: function(data) {
-                        alert('generating excel file...');
+                    success: function(data, status, request) {
+                        status_url = request.getResponseHeader('Location');
+                        update_progress(status_url, nanobar, div[0]);
                     },
                     fail: function(error) {
                         console.log('error');
                     }
                 })
             });
+
+            function update_progress(status_url, nanobar, status_div) {
+                // send GET request to status URL
+                $.getJSON(status_url, function(data) {
+                    // update UI
+                    percent = parseInt(data['current'] * 100 / data['total']);
+                    nanobar.go(percent);
+                    $(status_div.childNodes[1]).text(percent + '%');
+
+                    if (data['status'] == 'COMPLETED') {
+                        download_link = $('<a>Download</a>');
+                        download_link.attr('href', data['url']);
+                        $(status_div.childNodes[2]).append(download_link);
+                    } else {
+                        // rerun in 2 seconds
+                        setTimeout(function() {
+                            update_progress(status_url, nanobar, status_div);
+                        }, 2000);
+                    }
+                });
+            }
         });
     </script>
 {% endblock %}
@@ -31,10 +63,8 @@
     </div>
 
     <div>
-        <h1>Files</h1>
+        <h1>Reports</h1>
         <hr />
-        {% for url in urls %}
-        <a href='{{url}}'>Download</a>
-        {% endfor %}
+        <div id='progress'></div>
     </div>
 {% endblock %}
