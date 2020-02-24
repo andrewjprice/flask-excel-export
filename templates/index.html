@@ -3,20 +3,30 @@
 {% block javascript %}
     <script src="//cdnjs.cloudflare.com/ajax/libs/nanobar/0.2.1/nanobar.min.js"></script>
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(function() {
             $('#small').on('click', function() {
-                div = $('<div class="progress"><div>Small File</div><div>0%</div><div id="download"></div></div><hr style="width: 50%" />');
+                generate_report('Small', 5);
+            });
+
+            $('#medium').on('click', function() {
+                generate_report('Medium', 50);
+            });
+
+            $('#large').on('click', function() {
+                generate_report('Large', 100);
+            });
+
+            function generate_report(description, size) {
+                div = $('<div class="progress"><div id="description">' + description + ' File</div><div></div><div>0%</div><div id="download"></div></div><hr style="width: 50%" />');
                 $('#progress').append(div);
 
                 // create a progress bar
-                var nanobar = new Nanobar({
-                    bg: '#44f',
-                    target: div[0].childNodes[0]
-                });
+                var nanobar = new Nanobar({ bg: '#44f', target: div[0].childNodes[1] });
 
                 $.ajax({
-                    url: '/generate_small',
+                    url: '/generate_report',
                     type: 'GET',
+                    data: {size: size},
                     success: function(data, status, request) {
                         status_url = request.getResponseHeader('Location');
                         update_progress(status_url, nanobar, div[0]);
@@ -24,8 +34,8 @@
                     fail: function(error) {
                         console.log('error');
                     }
-                })
-            });
+                }) 
+            }
 
             function update_progress(status_url, nanobar, status_div) {
                 // send GET request to status URL
@@ -33,7 +43,7 @@
                     // update UI
                     percent = parseInt(data['current'] * 100 / data['total']);
                     nanobar.go(percent);
-                    $(status_div.childNodes[1]).text(percent + '%');
+                    $(status_div.childNodes[2]).text(percent + '%');
 
                     if (data['status'] == 'COMPLETED') {
                         download_link = $('<a>Download</a>');
@@ -57,8 +67,8 @@
         <hr />
         <div>
             <button id='small'>Generate Small Excel</button>
-            <button>Generate Medium Excel</button>
-            <button>Generate Large Excel</button>
+            <button id='medium'>Generate Medium Excel</button>
+            <button id='large'>Generate Large Excel</button>
         </div>
     </div>
 

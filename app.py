@@ -1,6 +1,6 @@
 import boto3, random, time
 from io import BytesIO
-from flask import Flask, render_template, jsonify, url_for
+from flask import Flask, render_template, jsonify, url_for, request
 from celery import Celery
 from pyexcelerate import Workbook
 
@@ -49,9 +49,10 @@ def generate_excel(self, size=5):
 def index():
     return render_template('index.html')
 
-@app.route('/generate_small', methods=['GET', 'POST'])
-def generate_small():
-    task = generate_excel.apply_async()
+@app.route('/generate_report', methods=['GET'])
+def generate_report():
+    size = int(request.args.get('size'))
+    task = generate_excel.apply_async(args=[size])
     return jsonify({}), 202, {'Location': url_for('taskstatus', task_id=task.id)}
 
 @app.route('/taskstatus/<task_id>')
