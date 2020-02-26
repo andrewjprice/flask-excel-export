@@ -1,5 +1,7 @@
 # Flask - Celery Example
 
+![](excel-report-generator.gif)
+
 ## Steps
 1. Add AWS S3 credentials in app.py
 
