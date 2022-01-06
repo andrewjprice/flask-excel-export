@@ -1,5 +1,5 @@
 boto3==1.12.5
-Celery==4.3.0
+Celery==5.2.2
 Flask==1.1.1
 Jinja2==2.11.1 
 PyExcelerate==0.8.0 
